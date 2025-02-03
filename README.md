@@ -1,30 +1,67 @@
-# React + TypeScript + Vite
+# Frontend Template
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is a **frontend template** for an API management application, providing user authentication features. It is built using **React, TypeScript, Material-UI, and Redux Toolkit Query (RTK Query)** for API interactions.
 
-Currently, two official plugins are available:
+## Table of Contents
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- [Features](#features)
+- [Technologies](#technologies)
+- [Installation](#installation)
+- [Usage](#usage)
+- [API Endpoints](#api-endpoints)
+- [Folder Structure](#folder-structure)
+- [Contributing](#contributing)
+- [License](#license)
 
-## Expanding the ESLint configuration
+## Features
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+✅ User Authentication (Login, Signup, Forgot Password, Reset Password)  
+✅ JWT-Based Authentication (Access Token & Refresh Token Handling)  
+✅ API Integration with Redux Toolkit Query (RTK Query)  
+✅ Responsive UI with Material-UI  
+✅ Secure & Scalable Code Structure
 
-- Configure the top-level `parserOptions` property like this:
+## Technologies
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: "latest",
-    sourceType: "module",
-    project: ["./tsconfig.json", "./tsconfig.node.json"],
-    tsconfigRootDir: __dirname,
-  },
-};
-```
+- React
+- Redux Toolkit
+- Material-UI
+- React Router
+- TypeScript
+- React-Hook-Form
+- Yup Validation
+- Framer-Motion
+- i18n
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+## Installation
+
+To get started with this project, follow these steps:
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/yourusername/your-repo-name.git
+   ```
+
+2. Navigate to the project directory:
+
+   ```bash
+   cd frontend-ts
+   ```
+
+3. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+4. Create a `.env` file for environment variables:
+
+   ```plaintext
+   VITE_BE_URL = "http://localhost:5000"
+   ```
+
+5. Start the development server:
+   ```bash
+   npm run dev
+   ```
