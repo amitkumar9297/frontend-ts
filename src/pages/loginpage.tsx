@@ -20,6 +20,11 @@ const schema = yup.object().shape({
     .required("Password is required"),
 });
 
+/**
+ * A React component that handles user login.
+ *
+ * @returns {JSX.Element} The JSX element representing the login form.
+ */
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const [enableForgotPass, setEnableForgotPass] = useState(false);
@@ -33,6 +38,11 @@ const Login: React.FC = () => {
   } = useForm({
     resolver: yupResolver(schema),
   });
+
+  /**
+   * Handles the login form submission
+   * @param {Object} data - The form data containing the user's email and password.
+   */
 
   const handleLogin = async (data) => {
     try {

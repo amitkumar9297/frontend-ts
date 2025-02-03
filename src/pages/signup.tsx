@@ -34,6 +34,16 @@ const schema = yup.object().shape({
     .required("Role is required"),
 });
 
+/**
+ * SignUp component.
+ *
+ * This component handles user sign up. It renders a form with name, email, password, and role fields.
+ * When the form is submitted, it calls the signUp mutation and dispatches the setTokens and setUser actions.
+ * If the sign up is successful, it shows a success toast and redirects to the login page after 1.5 seconds.
+ * If the sign up fails, it shows an error toast.
+ *
+ * @returns {JSX.Element} The SignUp component.
+ */
 const SignUp: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();

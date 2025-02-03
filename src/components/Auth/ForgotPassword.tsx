@@ -35,6 +35,14 @@ const ForgotPassword: React.FC = () => {
     resolver: yupResolver(schema),
   });
 
+  /**
+   * Handles the form submission.
+   *
+   * Sends a request to the backend to send a password reset link to the user's email.
+   * If the response is successful, shows a success toast message.
+   * If the request fails, shows an error toast message.
+   * @param {Object} data - The form data containing the user's email.
+   */
   const onSubmit = async (data: { email: string }) => {
     try {
       const response = await forgetPasswordRequest({

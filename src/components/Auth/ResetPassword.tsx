@@ -28,6 +28,19 @@ const schema = yup.object().shape({
     .required("Confirm password is required"),
 });
 
+/**
+ * A page component for resetting the user's password.
+ *
+ * This component takes a query parameter `token` and `email` from the URL.
+ * If the token is invalid or missing, it displays an error message.
+ * If the token is valid, it renders a form for the user to enter their new password.
+ * When the form is submitted, it calls the `resetPassword` mutation with the
+ * provided token, email, and new password.
+ *
+ * If the mutation is successful, it redirects the user to the login page.
+ * If the mutation fails, it displays an error message.
+ */
+
 const ResetPassword: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();

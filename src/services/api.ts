@@ -64,6 +64,15 @@ export const baseQuery = fetchBaseQuery({
   },
 });
 
+/**
+ * A base query function that handles expired access tokens by
+ * attempting to refresh the token and retrying the original request.
+ *
+ * @param args The fetch arguments to pass to the underlying query function
+ * @param api The RTK Query API object
+ * @param extraOptions Additional options to pass to the underlying query function
+ * @returns The result of the query, which may have been retried with a new access token
+ */
 export const baseQueryWithReauth: BaseQueryFn<FetchArgs, unknown, FetchBaseQueryError> = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions);
 
@@ -76,7 +85,7 @@ export const baseQueryWithReauth: BaseQueryFn<FetchArgs, unknown, FetchBaseQuery
       // Attempt token refresh
       const refreshResult = await refreshTokenBaseQuery(
         {
-          url: "refresh-token",
+          url: "users/refresh-token",
           method: "POST"
         },
         api,
