@@ -132,10 +132,7 @@ const Header: React.FC = () => {
             </>
           )}
 
-          <motion.div
-            whileHover={{ scale: 1.2 }}
-            whileTap={{ scale: 0.9 }}
-          >
+          <motion.div whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}>
             <Button variant="contained" onClick={toggleTheme}>
               {mode === "light" ? (
                 <MdSunny size={20} color={"yellow"} />

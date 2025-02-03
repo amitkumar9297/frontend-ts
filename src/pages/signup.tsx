@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import { useSignUpMutation } from "../services/auth.api";
-import { setTokens, setUser } from "../store/reducers/authReducer";
-import {useNavigate} from 'react-router-dom'
+import { setUser, setTokens } from "../store/reducers/authReducer";
+import { useNavigate } from "react-router-dom";
 import {
-  Box,
   Button,
   CircularProgress,
   FormControl,
@@ -18,42 +17,64 @@ import {
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAppDispatch } from "../store/store";
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 
-const SignUp = () => {
-  const navigate=useNavigate();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [role, setRole] = useState("USER"); // Default role is USER
-  const [signUp, { isLoading, error }] = useSignUpMutation();
+const schema = yup.object().shape({
+  name: yup.string().required("Name is required"),
+  email: yup.string().email("Invalid email").required("Email is required"),
+  password: yup
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .required("Password is required"),
+  role: yup
+    .string()
+    .oneOf(["ADMIN", "USER"], "Invalid role")
+    .required("Role is required"),
+});
+
+const SignUp: React.FC = () => {
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const [signUp, { isLoading }] = useSignUpMutation();
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      role: "USER",
+    },
+  });
+
+  const handleSignUp = async (data) => {
     try {
-      const data = await signUp({ name, email, password, role }).unwrap();
-      console.log(data);
-
-      // dispatch(
-      //   setTokens({
-      //     accessToken: data.data.accessToken,
-      //     refreshToken: data.data.refreshToken,
-      //   })
-      // );
+      const response = await signUp(data).unwrap();
+      console.log(response);
 
       dispatch(
-        setUser({
-          id: data.data.user._id,
-          name: data.data.user.name,
-          email: data.data.user.email,
-          role: data.data.user.role,
+        setTokens({
+          accessToken: response.data.accessToken,
+          refreshToken: response.data.refreshToken,
         })
       );
 
+      dispatch(
+        setUser({
+          id: response.data.user._id,
+          name: response.data.user.name,
+          email: response.data.user.email,
+          role: response.data.user.role,
+        })
+      );
       toast.success("Sign Up Successful");
-      setTimeout(() => {
-       navigate('/login')
-      },1500)
+      setTimeout(() => navigate("/login"), 1500);
     } catch (err) {
       toast.error("Sign Up Failed");
       console.error(err);
@@ -61,7 +82,7 @@ const SignUp = () => {
   };
 
   return (
-<motion.div
+    <motion.div
       initial={{ x: 100, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
@@ -73,73 +94,81 @@ const SignUp = () => {
           margin: "80px auto",
           padding: 4,
           borderRadius: 3,
-          // backgroundColor: "#fff",
           boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
         }}
       >
         <Typography variant="h5" fontWeight="bold" align="center" gutterBottom>
           Sign Up
         </Typography>
-        <form onSubmit={handleSignUp}>
-          <TextField
-            label="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            variant="outlined"
-            fullWidth
-            required
-            margin="normal"
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                "&:hover fieldset": { borderColor: "primary.main" },
-                "&.Mui-focused fieldset": { borderColor: "primary.main" },
-              },
-            }}
+        <form onSubmit={handleSubmit(handleSignUp)}>
+          <Controller
+            name="name"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Name"
+                variant="outlined"
+                fullWidth
+                required
+                margin="normal"
+                error={!!errors.name}
+                helperText={errors.name?.message}
+              />
+            )}
           />
-          <TextField
-            label="Email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            variant="outlined"
-            fullWidth
-            required
-            margin="normal"
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                "&:hover fieldset": { borderColor: "primary.main" },
-                "&.Mui-focused fieldset": { borderColor: "primary.main" },
-              },
-            }}
+          <Controller
+            name="email"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Email"
+                type="email"
+                variant="outlined"
+                fullWidth
+                required
+                margin="normal"
+                error={!!errors.email}
+                helperText={errors.email?.message}
+              />
+            )}
           />
-          <TextField
-            label="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            variant="outlined"
-            fullWidth
-            required
-            margin="normal"
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                "&:hover fieldset": { borderColor: "primary.main" },
-                "&.Mui-focused fieldset": { borderColor: "primary.main" },
-              },
-            }}
+          <Controller
+            name="password"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Password"
+                type="password"
+                variant="outlined"
+                fullWidth
+                required
+                margin="normal"
+                error={!!errors.password}
+                helperText={errors.password?.message}
+              />
+            )}
           />
-          <FormControl fullWidth margin="normal">
+          <FormControl fullWidth margin="normal" error={!!errors.role}>
             <InputLabel>Role</InputLabel>
-            <Select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              label="Role"
-              required
-            >
-              <MenuItem value="ADMIN">ADMIN</MenuItem>
-              <MenuItem value="USER">USER</MenuItem>
-            </Select>
+            <Controller
+              name="role"
+              control={control}
+              render={({ field }) => (
+                <Select {...field} label="Role" required>
+                  <MenuItem value="ADMIN">ADMIN</MenuItem>
+                  <MenuItem value="USER">USER</MenuItem>
+                </Select>
+              )}
+            />
           </FormControl>
+          {errors.role && (
+            <Typography color="error" variant="body2">
+              {errors.role.message}
+            </Typography>
+          )}
           <Button
             type="submit"
             variant="contained"
@@ -150,16 +179,16 @@ const SignUp = () => {
               padding: 1.5,
               fontWeight: "bold",
               textTransform: "none",
-              "&:hover": {
-                backgroundColor: "primary.dark",
-              },
             }}
             disabled={isLoading}
           >
-            {isLoading ? <CircularProgress size={24} color="inherit" /> : "Sign Up"}
+            {isLoading ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              "Sign Up"
+            )}
           </Button>
         </form>
-
         <Typography variant="body2" sx={{ marginTop: 2 }} align="center">
           Already have an account?{" "}
           <Button
@@ -170,12 +199,6 @@ const SignUp = () => {
             Login
           </Button>
         </Typography>
-
-        {error && (
-          <Typography color="error" variant="body2" sx={{ marginTop: 2, textAlign: "center" }}>
-            {error}
-          </Typography>
-        )}
       </Paper>
     </motion.div>
   );

@@ -1,20 +1,42 @@
-// ResetPassword.tsx
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { TextField, Button, Container, Typography, Box } from "@mui/material";
+import {
+  TextField,
+  Button,
+  Container,
+  Typography,
+  Box,
+  Alert,
+  Card,
+  CardContent,
+} from "@mui/material";
 import { useResetPasswordMutation } from "../../services/auth.api";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import { motion } from "framer-motion";
 
-const ResetPassword = () => {
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+// Validation Schema
+const schema = yup.object().shape({
+  newPassword: yup
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .required("New password is required"),
+  confirmPassword: yup
+    .string()
+    .oneOf([yup.ref("newPassword")], "Passwords must match")
+    .required("Confirm password is required"),
+});
+
+const ResetPassword: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [resetPassword, { isLoading }] = useResetPasswordMutation();
 
-  // Extract the token from the query params
+  // Extract the token from query params
   const queryParams = new URLSearchParams(location.search);
   const token = queryParams.get("token");
+  const email = queryParams.get("email");
 
   useEffect(() => {
     if (!token) {
@@ -22,40 +44,40 @@ const ResetPassword = () => {
     }
   }, [token]);
 
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
+
   // Handle form submission
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-
-    if (!newPassword || !confirmPassword) {
-      setError("Both fields are required");
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-
+  const onSubmit = async (data: {
+    newPassword: string;
+    confirmPassword: string;
+  }) => {
     if (!token) {
-      setError("Token is missing");
+      setError("newPassword", { message: "Token is missing" });
       return;
     }
 
     try {
-      setError(null);
-
       const response = await resetPassword({
-        token: token,
-        password: newPassword,
-      });
-
-      if (response.data.success) {
+        token,
+        newPassword: data.newPassword,
+        email,
+      }).unwrap();
+      if (response.message === "Password updated successfully") {
         navigate("/login"); // Redirect to login page on success
       } else {
-        setError("Password reset failed");
+        setError("newPassword", { message: "Password reset failed" });
       }
     } catch (error) {
-      setError("An error occurred while resetting the password");
+      setError("newPassword", {
+        message: "An error occurred while resetting the password",
+      });
     }
   };
 
@@ -69,44 +91,57 @@ const ResetPassword = () => {
           marginTop: 8,
         }}
       >
-        <Typography variant="h5">Reset Password</Typography>
-        {error && (
-          <Typography color="error" variant="body2" sx={{ marginBottom: 2 }}>
-            {error}
-          </Typography>
-        )}
-        <form onSubmit={handleSubmit} style={{ width: "100%" }}>
-          <TextField
-            label="New Password"
-            variant="outlined"
-            type="password"
-            fullWidth
-            margin="normal"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            required
-          />
-          <TextField
-            label="Confirm Password"
-            variant="outlined"
-            type="password"
-            fullWidth
-            margin="normal"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-          />
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            fullWidth
-            sx={{ marginTop: 2 }}
-            disabled={isLoading}
-          >
-            {isLoading ? "Resetting..." : "Reset Password"}
-          </Button>
-        </form>
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
+          <Card sx={{ boxShadow: 6, borderRadius: 3, padding: 2 }}>
+            <CardContent>
+              <Typography variant="h5" align="center" gutterBottom>
+                Reset Password
+              </Typography>
+              {errors.newPassword && (
+                <Alert severity="error">{errors.newPassword.message}</Alert>
+              )}
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                style={{ width: "100%", marginTop: "16px" }}
+              >
+                <TextField
+                  label="New Password"
+                  variant="outlined"
+                  type="password"
+                  fullWidth
+                  margin="normal"
+                  {...register("newPassword")}
+                  error={!!errors.newPassword}
+                  helperText={errors.newPassword?.message}
+                />
+                <TextField
+                  label="Confirm Password"
+                  variant="outlined"
+                  type="password"
+                  fullWidth
+                  margin="normal"
+                  {...register("confirmPassword")}
+                  error={!!errors.confirmPassword}
+                  helperText={errors.confirmPassword?.message}
+                />
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  sx={{ marginTop: 2 }}
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Resetting..." : "Reset Password"}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </motion.div>
       </Box>
     </Container>
   );
